@@ -37,14 +37,34 @@ class GaussianKernel(KernelFunction):
 		self.gamma = gamma
 	
 	def compute(self, x_i, x_j):
+		x_i = np.asarray(x_i)
+		x_j = np.asarray(x_j)
+
+		# 情况1：两个都是单个样本
 		if x_i.ndim == 1 and x_j.ndim == 1:
 			diff = x_i - x_j
 			return np.exp(-self.gamma * np.dot(diff, diff))
-		else:
-			# 计算两两之间的距离
-			diff = x_i[:, np.newaxis, :] - x_j[np.newaxis, :, :]
-			sq_dist = np.sum(diff**2, axis=2)
+
+		# 情况2：x_i是单个样本，x_j是一批样本
+		elif x_i.ndim == 1 and x_j.ndim == 2:
+			diff = x_j - x_i
+			sq_dist = np.sum(diff ** 2, axis=1)
 			return np.exp(-self.gamma * sq_dist)
+
+		# 情况3：x_i是一批样本，x_j是单个样本
+		elif x_i.ndim == 2 and x_j.ndim == 1:
+			diff = x_i - x_j
+			sq_dist = np.sum(diff ** 2, axis=1)
+			return np.exp(-self.gamma * sq_dist)
+
+		# 情况4：两边都是一批样本
+		elif x_i.ndim == 2 and x_j.ndim == 2:
+			diff = x_i[:, np.newaxis, :] - x_j[np.newaxis, :, :]
+			sq_dist = np.sum(diff ** 2, axis=2)
+			return np.exp(-self.gamma * sq_dist)
+
+		else:
+			raise ValueError(f"Unsupported input shapes: x_i.shape={x_i.shape}, x_j.shape={x_j.shape}")
 
 
 # ==================== 数据工具 ====================
