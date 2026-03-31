@@ -61,44 +61,24 @@
 \newcommand{\labplace}{数学实验中心}
 \newcommand{\experimenttitle}{SVM 算法解决二/多分类问题}
 \newcommand{\schoolyear}{2023--2024学年\quad 第二学期}
+\usepackage{fancyhdr}
+
+% 设置 fancyhdr 样式
+\fancypagestyle{plain}{
+	\fancyhf{} % 清除所有预设的页眉和页脚
+	\renewcommand{\headrulewidth}{0pt} % 如果不需要页眉线
+	\renewcommand{\footrulewidth}{0pt} % 如果不需要页脚线
+}
+
+% 应用新的 plain 样式到所有页面
+\pagestyle{plain}
 
 \begin{document}
-	
-	\begin{titlepage}
-		\centering
-		{\includegraphics[scale=1]{figure1.jpg}}
-		
-		\vspace{1.8cm}
-		
-		{\heiti\zihao{-1} 机器学习\par}
-		
-		\vspace{2.2cm}
-		
-		{\zihao{3} 实验报告\par}
-		
-		\vspace{1.8cm}
-		
-		{\zihao{4} \schoolyear\par}
-		
-		\vspace{1.8cm}
-		
-		\renewcommand{\arraystretch}{2.0}
-		\begin{tabular}{>{\raggedleft\arraybackslash}p{7cm} p{9cm}}
-			学\hspace{2em}院： & \schoolname \\
-			班\hspace{2em}级： & \classname \\
-			学\hspace{2em}号： & \studentid \\
-			姓\hspace{2em}名： & \studentname \\
-			指导教师： & \teachername \\
-			实验地点： & \labplace \\
-		\end{tabular}
-		
-		\vfill
-	\end{titlepage}
 	
 	\section*{实验二：SVM 算法解决二/多分类问题}
 	
 	\section*{一、实验内容}
-	这次实验我做的是支持向量机在多分类任务上的实现。按照题目要求，我没有直接调用现成的 SVM 分类函数，而是自己写了一个线性二分类 SVM，再在这个基础上扩展成多分类模型。具体来说，我分别实现了二分类 SVM、One-vs-Rest 和 One-vs-One 两种多分类策略，然后在人工生成的三分类数据集上做训练和测试。
+	这次实验我做的是支持向量机在多分类任务上的实现。根据要求，本实验分别实现了二分类 SVM、One-vs-Rest 和 One-vs-One 两种多分类策略，然后在人工生成的三分类数据集上做训练和测试。
 	
 	整个实验主要包括这几个部分：先生成带有三个类别的二维数据；然后把数据划分为训练集和测试集，并做标准化处理；接着训练多分类 SVM 模型；最后用准确率、混淆矩阵和分类边界图来观察模型效果。因为这次实验强调可视化，所以我把数据分布、决策区域和混淆矩阵都画了出来，结果看起来也比较直观。
 	
@@ -113,9 +93,9 @@
 	\[
 	L = \frac{\lambda}{2}\|w\|^2 + \sum_{i=1}^{n}\max\bigl(0,1-y_i(w^Tx_i+b)\bigr)
 	\]
-	前一项控制模型复杂度，后一项约束分类间隔。训练时，我采用了逐样本更新的方式来近似做梯度下降。
+	前一项控制模型复杂度，后一项约束分类间隔。训练时，本实验采用了逐样本更新的方式来近似做梯度下降。
 	
-	因为实验是三分类任务，所以我又在二分类 SVM 的基础上扩展了多分类策略：
+	因为实验是三分类任务，所以本实验又在二分类 SVM 的基础上扩展了多分类策略：
 	\begin{itemize}
 		\item[(1)] \textbf{One-vs-Rest（OvR）}：每个类别分别和其余类别做一次二分类，一共训练 $K$ 个分类器，预测时选择得分最大的类别；
 		\item[(2)] \textbf{One-vs-One（OvO）}：任意两类之间训练一个二分类器，一共训练 $K(K-1)/2$ 个分类器，预测时通过投票决定最终类别。
@@ -231,7 +211,7 @@
 	其中 $\mathbb{I}[\cdot]$ 为示性函数。
 	
 	\section*{六、核心代码}
-	下面给出本次实验中最关键的一部分代码：核函数定义、支持向量机实现和多分类策略。
+	下面给出本次实验中最关键的一部分代码：核函数定义、支持向量机实现和多分类策略。The code of this part is available at \footnote{https://github.com/HaoranYuandomestic/ex2\_SVM.git}
 	
 	\subsubsection*{6.1 核函数的实现}
 	
@@ -479,7 +459,7 @@ class OneVsOneSVM:
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.6\textwidth]{output3.png}
+		\includegraphics[scale=0.5]{output3.png}
 		\caption{标准化后训练集与测试集的分布情况}
 	\end{figure}
 	
@@ -487,7 +467,7 @@ class OneVsOneSVM:
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[scale=0.6]{output.png}
+		\includegraphics[scale=0.5]{output.png}
 		\caption{OvO 策略下使用高斯核的决策边界}
 	\end{figure}
 	
@@ -506,13 +486,13 @@ class OneVsOneSVM:
 	\begin{enumerate}
 		\item 标签格式问题。 二分类 SVM 更新时更适合用 $\{-1,+1\}$ 作为标签，而原始多分类标签是 $\{0,1,2\}$。我在训练每个二分类器时，单独把当前任务对应的标签映射成了 $+1$ 和 $-1$。
 		\item 多分类预测的整合问题。 OvR 和 OvO 的合并逻辑是不一样的：OvR 是比较分数选择最大的，OvO 是统计投票数选择多数。
-		\item 核函数计算的效率问题。 对于高斯核等复杂核函数，计算两两之间的核值需要大量计算。我通过使用 NumPy 的向量化操作来加速计算。在决策函数计算时，使用 $f(x) = \sum_{i=1}^m \alpha_i y_i \kappa(x, x_i) + b$ 形式，避免显式特征映射。
+		\item 核函数计算的效率问题。 对于高斯核等复杂核函数，计算两两之间的核值需要大量计算。本实验通过使用 NumPy 的向量化操作来加速计算。在决策函数计算时，使用 $f(x) = \sum\limits_{i=1}^m \alpha_i y_i \kappa(x, x_i) + b$ 形式，避免显式特征映射。
 		\item 参数 $\gamma$ 的选择问题。 高斯核的带宽参数 $\gamma$ 对模型性能影响很大。太小的 $\gamma$ 会导致模型欠拟合，太大的 $\gamma$ 会导致过拟合。通过网格搜索可以找到合适的 $\gamma$ 值。
 		\item 可视化问题。 对于高维特征，不能直接可视化。解决方法是在实验中使用低维数据集（如鸢尾花数据集）或使用 PCA 降维。
 	\end{enumerate}
 	
 	\section*{十、实验总结}
-	这次实验让我更深入地理解了支持向量机的精妙之处。特别是核函数的引入，使我认识到：
+	这次实验通过实现支持向量机算法，加强我们对核方法求解问题的理解。特别是核函数的引入，具有如下的意义：
 	\begin{enumerate}
 		\item 核函数的作用：通过定义合适的核函数，我们可以在隐含的高维特征空间中进行线性分类，而不需要显式计算高维特征，这大大降低了计算复杂度。
 		\item 参数优化的重要性：不同的核函数和参数组合会显著影响模型的性能。通过网格搜索等系统的优化方法，我们能够找到最优的参数组合。
